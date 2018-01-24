@@ -20,7 +20,7 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "mysql": "^2.15.0",
-    "postgrator": "^3.4.0",
+    "postgrator": "^2.10.3",
     "ramda": "^0.25.0",
     "sequelize": "^3.31.1"
   },
