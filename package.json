@@ -1,0 +1,54 @@
+{
+  "name": "mysql-database",
+  "version": "1.0.0",
+  "description": "Core MySQL Database Class",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "pkg-build",
+    "coverage": "NODE_ENV=test_local pkg-coverage",
+    "flow": "pkg-flow",
+    "lint": "pkg-lint",
+    "prepublish": "pkg-build",
+    "test": "NODE_ENV=test_local pkg-test",
+    "test-only": "NODE_ENV=test_local pkg-test-only"
+  },
+  "author": "George Czabania <george@mish.guru>",
+  "license": "ISC",
+  "devDependencies": {
+    "@mishguru/package": "^1.15.4"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "mysql": "^2.15.0",
+    "postgrator": "^3.4.0",
+    "ramda": "^0.25.0",
+    "sequelize": "^3.31.1"
+  },
+  "babel": {
+    "presets": [
+      "flow",
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ],
+    "plugins": [
+      [
+        "transform-object-rest-spread",
+        {
+          "useBuiltIns": true
+        }
+      ]
+    ]
+  },
+  "ava": {
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
+  }
+}
