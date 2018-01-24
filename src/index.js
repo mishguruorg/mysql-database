@@ -74,6 +74,11 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
     if (typeof this.acceptableDbNamePrefix !== 'string' || this.acceptableDbNamePrefix.trim().length === 0) {
       throw new Error('acceptableDbNamePrefix must be a non-empty string')
     }
+
+    this.migrationDirectory = options.migrationDirectory
+    if (typeof this.migrationDirectory !== 'string' || this.migrationDirectormigrationDirectory.trim().length === 0) {
+      throw new Error('migrationDirectory must be a non-empty string')
+    }
   }
 
   /**
@@ -107,7 +112,7 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
     }
 
     return authenticate(this.sequelize)
-      .then(() => checkMigrations(this.config))
+      .then(() => checkMigrations(this.migrationDirectory, this.config))
   }
 
   /**
@@ -117,7 +122,7 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
    *
    */
   migrate (version) {
-    return runMigrations(version, this.config)
+    return runMigrations(this.migrationDirectory, version, this.config)
   }
 
   initTestDb (config) {

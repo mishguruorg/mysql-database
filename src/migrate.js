@@ -1,10 +1,9 @@
 import postgrator from 'postgrator'
-import { join } from 'path'
 import Promise from 'bluebird'
 
-const checkMigrations = (config) => {
+const checkMigrations = (migrationDirectory, config) => {
   postgrator.setConfig({
-    migrationDirectory: join(__dirname, 'migrations'),
+    migrationDirectory,
     driver: 'mysql', // or pg.js, mysql, mssql, tedious
     host: config.host,
     database: config.name,
@@ -35,9 +34,9 @@ const checkMigrations = (config) => {
   })
 }
 
-const runMigrations = (version, config) => {
+const runMigrations = (migrationDirectory, version, config) => {
   postgrator.setConfig({
-    migrationDirectory: join(__dirname, 'migrations'),
+    migrationDirectory,
     driver: 'mysql',
     host: config.host,
     database: config.name,
