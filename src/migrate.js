@@ -8,7 +8,8 @@ const initPostgrator = (migrationDirectory, config) => {
     port: config.port,
     database: config.name,
     username: config.user,
-    password: config.pass
+    password: config.pass,
+    validateChecksums: false
   })
 
   if (config.verbose) {
