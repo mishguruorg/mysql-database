@@ -15,7 +15,7 @@
   "author": "George Czabania <george@mish.guru>",
   "license": "ISC",
   "devDependencies": {
-    "@mishguru/package": "^1.15.4"
+    "@mishguru/package": "^2.2.2"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
