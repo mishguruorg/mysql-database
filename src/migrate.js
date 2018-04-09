@@ -1,65 +1,66 @@
-import postgrator from 'postgrator'
-import Promise from 'bluebird'
+import Postgrator from 'postgrator'
 
-const checkMigrations = (migrationDirectory, config) => {
-  postgrator.setConfig({
-    migrationDirectory,
-    driver: 'mysql', // or pg.js, mysql, mssql, tedious
-    host: config.host,
-    port: config.port,
-    database: config.name,
-    username: config.user,
-    password: config.pass,
-    logProgress: config.verbose
-  })
-  postgrator.getVersions((err, versions) => {
-    if (err) {
-      console.warn('There was an error getting versions')
-    } else {
-      if (versions.current !== versions.max) {
-        const errorMessage = [
-          '*************************************************',
-          '*************************************************',
-          versions.current < versions.max
-            ? 'The database is out of date and needs to be migrated!'
-            : 'The @mishguru/data package is out of date and should be updated!',
-          '*************************************************',
-          `Database is on version: ${versions.current}`,
-          `@mishguru/data is on version: ${versions.max}`,
-          '*************************************************',
-          '*************************************************'
-        ].join('\n')
-        console.warn(errorMessage)
-      }
-    }
-  })
-}
-
-const runMigrations = (migrationDirectory, version, config) => {
-  postgrator.setConfig({
+const initPostgrator = (migrationDirectory, config) => {
+  const postgrator = new Postgrator({
     migrationDirectory,
     driver: 'mysql',
     host: config.host,
     port: config.port,
     database: config.name,
     username: config.user,
-    password: config.pass,
-    logProgress: config.verbose
+    password: config.pass
   })
+
+  if (config.verbose) {
+    postgrator.on('migration-started', (migration) => {
+      process.stdout.write(`> ${migration.filename} ...`)
+    })
+    postgrator.on('migration-finished', (migration) => {
+      console.log('done!')
+    })
+  }
+
+  return postgrator
+}
+
+const checkMigrations = async (migrationDirectory, config) => {
+  const postgrator = initPostgrator(migrationDirectory, config)
+
+  try {
+    const maxVersion = await postgrator.getMaxVersion()
+    const databaseVersion = await postgrator.getDatabaseVersion()
+
+    if (maxVersion !== databaseVersion) {
+      console.warn([
+        '*************************************************',
+        '*************************************************',
+        databaseVersion < maxVersion
+          ? 'The database is out of date and needs to be migrated!'
+          : 'The @mishguru/data package is out of date and should be updated!',
+        '*************************************************',
+        `Database is on version: ${databaseVersion}`,
+        `@mishguru/data is on version: ${maxVersion}`,
+        '*************************************************',
+        '*************************************************'
+      ].join('\n'))
+    }
+  } catch (error) {
+    console.warn([
+      '*************************************************',
+      '*************************************************',
+      'Could not check database schema version!',
+      '*************************************************',
+      '*************************************************'
+    ].join('\n'))
+  }
+}
+
+const runMigrations = async (migrationDirectory, version, config) => {
+  const postgrator = initPostgrator(migrationDirectory, config)
 
   version = version != null ? version : 'max'
 
-  return new Promise((resolve, reject) => {
-    postgrator.migrate(version, (err, migrations) => {
-      if (err) {
-        reject(err)
-      }
-
-      postgrator.endConnection(() => {
-        resolve(version)
-      })
-    })
-  })
+  await postgrator.migrate(version)
 }
 
 export {

@@ -15,12 +15,13 @@
   "author": "George Czabania <george@mish.guru>",
   "license": "ISC",
   "devDependencies": {
+    "@mishguru/commandquery": "^7.2.0",
     "@mishguru/package": "^2.2.2"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
     "mysql": "^2.15.0",
-    "postgrator": "^2.10.3",
+    "postgrator": "^3.5.0",
     "ramda": "^0.25.0",
     "sequelize": "^3.31.1"
   },
