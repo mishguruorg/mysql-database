@@ -76,7 +76,7 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
     }
 
     this.migrationDirectory = options.migrationDirectory
-    if (typeof this.migrationDirectory !== 'string' || this.migrationDirectormigrationDirectory.trim().length === 0) {
+    if (typeof this.migrationDirectory !== 'string' || this.migrationDirectory.trim().length === 0) {
       throw new Error('migrationDirectory must be a non-empty string')
     }
   }

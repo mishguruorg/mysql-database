@@ -6,7 +6,7 @@ const checkMigrations = (migrationDirectory, config) => {
     migrationDirectory,
     driver: 'mysql', // or pg.js, mysql, mssql, tedious
     host: config.host,
-    host: config.port,
+    port: config.port,
     database: config.name,
     username: config.user,
     password: config.pass,
