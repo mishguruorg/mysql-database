@@ -39,3 +39,8 @@ test.serial('checkMigrations (afterwards)', async (t) => {
   await checkMigrations(migrationDirectory, config)
   t.pass()
 })
+
+test.serial('runMigrations (with number)', async (t) => {
+  await runMigrations(migrationDirectory, 1, config)
+  t.pass()
+})

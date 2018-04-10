@@ -60,6 +60,7 @@ const runMigrations = async (migrationDirectory, version, config) => {
   const postgrator = initPostgrator(migrationDirectory, config)
 
   version = version != null ? version : 'max'
+  version = version.toString()
 
   await postgrator.migrate(version)
 }
