@@ -14,7 +14,7 @@
   "author": "George Czabania <george@mish.guru>",
   "license": "ISC",
   "devDependencies": {
-    "@mishguru/commandquery": "^12.0.1",
+    "@mishguru/commandquery": "^12.1.1",
     "@mishguru/package": "^4.1.0"
   },
   "dependencies": {
