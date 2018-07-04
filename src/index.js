@@ -196,6 +196,10 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
           .then(() => endConnection())
       })
   }
+
+  directMySQLQuery (query) {
+    return directMySQLQuery(query, this.config)
+  }
 }
 
 export default MySQLDatabase
