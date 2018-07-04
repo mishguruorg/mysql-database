@@ -15,12 +15,12 @@
   "license": "ISC",
   "devDependencies": {
     "@mishguru/commandquery": "^12.1.1",
-    "@mishguru/package": "^4.1.0"
+    "@mishguru/package": "^4.3.1"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
     "mysql": "^2.15.0",
-    "postgrator": "^3.5.0",
+    "postgrator": "^3.6.0",
     "ramda": "^0.25.0",
     "sequelize": "^3.31.1"
   }
