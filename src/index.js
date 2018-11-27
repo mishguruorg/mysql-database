@@ -17,7 +17,7 @@ const parseConfig = (config) => {
     console.log('Initialising database, config contains: ')
 
     toPairs(config).forEach(([key, value]) => {
-      console.log(`  ${key}: ${value}`)
+      console.log(`  ${key}: ${/pass/.test(key) ? '**********' : value}`)
     })
   }
 
