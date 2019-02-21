@@ -14,14 +14,15 @@
   "author": "George Czabania <george@mish.guru>",
   "license": "ISC",
   "devDependencies": {
-    "@mishguru/commandquery": "^12.1.1",
-    "@mishguru/package": "^4.3.1"
+    "@mishguru/commandquery": "^18.2.0",
+    "@mishguru/package": "^5.1.0"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
-    "mysql": "^2.15.0",
-    "postgrator": "^3.6.0",
-    "ramda": "^0.25.0",
-    "sequelize": "^3.31.1"
+    "bluebird": "^3.5.3",
+    "delay": "^4.1.0",
+    "mysql": "^2.16.0",
+    "postgrator": "^3.8.0",
+    "ramda": "^0.26.1",
+    "sequelize": "^3.34.0"
   }
 }

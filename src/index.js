@@ -1,6 +1,7 @@
-import Sequelize from 'sequelize'
-import { toPairs } from 'ramda'
 import Promise from 'bluebird'
+import Sequelize from 'sequelize'
+import delay from 'delay'
+import { toPairs } from 'ramda'
 
 import { runMigrations, checkMigrations } from './migrate'
 import { authenticate, buildSequelizeConfig } from './sequelize-tools'
@@ -199,6 +200,22 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
 
   directMySQLQuery (query) {
     return directMySQLQuery(query, this.config)
+  }
+
+  withTransaction (fn, options = {}) {
+    const { minDelay = 100, maxDelay = 1000} = options
+
+    if (typeof fn !== 'function') {
+      throw new Error('Must pass a function to withTransaction')
+    }
+
+    return this.sequelize.transaction(fn).catch(async (error) => {
+      if (error.message.startsWith('ER_LOCK_DEADLOCK')) {
+        await delay(random.int(MIN_DELAY, MAX_DELAY))
+        return this.withTransaction(fn)
+      }
+      throw error
+    })
   }
 }
 
