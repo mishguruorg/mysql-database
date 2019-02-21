@@ -32,27 +32,31 @@ const checkMigrations = async (migrationDirectory, config) => {
     const databaseVersion = await postgrator.getDatabaseVersion()
 
     if (maxVersion !== databaseVersion) {
-      console.warn([
-        '*************************************************',
-        '*************************************************',
-        databaseVersion < maxVersion
-          ? 'The database is out of date and needs to be migrated!'
-          : 'The @mishguru/data package is out of date and should be updated!',
-        '*************************************************',
-        `Database is on version: ${databaseVersion}`,
-        `@mishguru/data is on version: ${maxVersion}`,
-        '*************************************************',
-        '*************************************************'
-      ].join('\n'))
+      console.warn(
+        [
+          '*************************************************',
+          '*************************************************',
+          databaseVersion < maxVersion
+            ? 'The database is out of date and needs to be migrated!'
+            : 'The @mishguru/data package is out of date and should be updated!',
+          '*************************************************',
+          `Database is on version: ${databaseVersion}`,
+          `@mishguru/data is on version: ${maxVersion}`,
+          '*************************************************',
+          '*************************************************'
+        ].join('\n')
+      )
     }
   } catch (error) {
-    console.warn([
-      '*************************************************',
-      '*************************************************',
-      'Could not check database schema version!',
-      '*************************************************',
-      '*************************************************'
-    ].join('\n'))
+    console.warn(
+      [
+        '*************************************************',
+        '*************************************************',
+        'Could not check database schema version!',
+        '*************************************************',
+        '*************************************************'
+      ].join('\n')
+    )
   }
 }
 
@@ -65,7 +69,4 @@ const runMigrations = async (migrationDirectory, version, config) => {
   await postgrator.migrate(version)
 }
 
-export {
-  checkMigrations,
-  runMigrations
-}
+export { checkMigrations, runMigrations }

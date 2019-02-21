@@ -1,11 +1,15 @@
 import Promise from 'bluebird'
 import Sequelize from 'sequelize'
 import delay from 'delay'
+import random from 'random'
 import { toPairs } from 'ramda'
 
 import { runMigrations, checkMigrations } from './migrate'
 import { authenticate, buildSequelizeConfig } from './sequelize-tools'
-import { directMySQLConnection, directMySQLQuery } from './commands/directMySQLQuery'
+import {
+  directMySQLConnection,
+  directMySQLQuery
+} from './commands/directMySQLQuery'
 import { destroyTestDbs, TEST_DB_PREFIX } from './test-tools'
 
 const parseConfig = (config) => {
@@ -35,12 +39,16 @@ class MySQLDatabase {
     this._saveConfig(config)
 
     if (this.testDbName.startsWith(this.acceptableDbNamePrefix) === false) {
-      throw new Error(`Not allowed to create a test DB with the name '${this.testDbName}'.
+      throw new Error(`Not allowed to create a test DB with the name '${
+        this.testDbName
+      }'.
 Name has to start with '${this.acceptableDbNamePrefix}'.`)
     }
 
-    const createTestDbQuery = `CREATE DATABASE IF NOT EXISTS ${this.testDbName};`
-    const setupTestDbQuery = 'SET GLOBAL sql_mode=\'\';'
+    const createTestDbQuery = `CREATE DATABASE IF NOT EXISTS ${
+      this.testDbName
+    };`
+    const setupTestDbQuery = "SET GLOBAL sql_mode='';"
 
     // Create test database, migrate it forward and then init it like normal
     return directMySQLQuery(createTestDbQuery, this.config)
@@ -67,17 +75,26 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
     }
 
     this.testDbName = options.testDbName
-    if (typeof this.testDbName !== 'string' || this.testDbName.trim().length === 0) {
+    if (
+      typeof this.testDbName !== 'string' ||
+      this.testDbName.trim().length === 0
+    ) {
       throw new Error('testDbName must be a non-empty string')
     }
 
     this.acceptableDbNamePrefix = options.acceptableDbNamePrefix
-    if (typeof this.acceptableDbNamePrefix !== 'string' || this.acceptableDbNamePrefix.trim().length === 0) {
+    if (
+      typeof this.acceptableDbNamePrefix !== 'string' ||
+      this.acceptableDbNamePrefix.trim().length === 0
+    ) {
       throw new Error('acceptableDbNamePrefix must be a non-empty string')
     }
 
     this.migrationDirectory = options.migrationDirectory
-    if (typeof this.migrationDirectory !== 'string' || this.migrationDirectory.trim().length === 0) {
+    if (
+      typeof this.migrationDirectory !== 'string' ||
+      this.migrationDirectory.trim().length === 0
+    ) {
       throw new Error('migrationDirectory must be a non-empty string')
     }
   }
@@ -112,8 +129,9 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
       console.warn('Ignoring call to initialise database, already initialised')
     }
 
-    return authenticate(this.sequelize)
-      .then(() => checkMigrations(this.migrationDirectory, this.config))
+    return authenticate(this.sequelize).then(() =>
+      checkMigrations(this.migrationDirectory, this.config)
+    )
   }
 
   /**
@@ -127,10 +145,18 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
   }
 
   initTestDb (config) {
-    console.warn('Deprecated: initTestDb should not be used. Replace with setupTestDb')
-    console.warn('initTestDb should be removed when Mocha tests are no longer being used')
+    console.warn(
+      'Deprecated: initTestDb should not be used. Replace with setupTestDb'
+    )
+    console.warn(
+      'initTestDb should be removed when Mocha tests are no longer being used'
+    )
 
-    this.testDbName = TEST_DB_PREFIX + Math.random().toString(36).substr(2, 5)
+    this.testDbName =
+      TEST_DB_PREFIX +
+      Math.random()
+        .toString(36)
+        .substr(2, 5)
     config.name = this.testDbName
 
     return this._createAndSetupDb(config)
@@ -155,13 +181,17 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
   }
 
   destroyTestDb () {
-    console.warn('Deprecated: destroyTestDb should not be used. Replace with teardownTestDb \n')
+    console.warn(
+      'Deprecated: destroyTestDb should not be used. Replace with teardownTestDb \n'
+    )
     console.warn('destroyTestDb returns a promise that performs NoOp')
     return Promise.resolve()
   }
 
   destroyAllTestDbs () {
-    console.warn('Deprecated: destroyAllTestDbs should not be used. Replace with teardownTestDb \n')
+    console.warn(
+      'Deprecated: destroyAllTestDbs should not be used. Replace with teardownTestDb \n'
+    )
     return destroyTestDbs(this.config)
   }
 
@@ -173,29 +203,33 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
         table_schema = '${this.testDbName}' and
         table_name != "schemaversion";
     `
-    return directMySQLQuery(queryTableNames, this.config)
-      .then((rows) => {
-        const deleteAndAlterAllTables = rows.reduce((lines, row) => {
-          return [
-            ...lines,
-            `delete from ${this.testDbName}.${row.table_name};`,
-            `alter table ${this.testDbName}.${row.table_name} auto_increment = 1;`
-          ]
-        }, [])
-
-        const tearDownQueries = [
-          'set foreign_key_checks = 0;', // disable a foreign keys check
-          ...deleteAndAlterAllTables,
-          'set foreign_key_checks = 1;' // enable a foreign keys check
+    return directMySQLQuery(queryTableNames, this.config).then((rows) => {
+      const deleteAndAlterAllTables = rows.reduce((lines, row) => {
+        return [
+          ...lines,
+          `delete from ${this.testDbName}.${row.table_name};`,
+          `alter table ${this.testDbName}.${row.table_name} auto_increment = 1;`
         ]
+      }, [])
 
-        const connection = directMySQLConnection(this.config)
-        const runQuery = Promise.promisify(connection.query, { context: connection })
-        const endConnection = Promise.promisify(connection.end, { context: connection })
+      const tearDownQueries = [
+        'set foreign_key_checks = 0;', // disable a foreign keys check
+        ...deleteAndAlterAllTables,
+        'set foreign_key_checks = 1;' // enable a foreign keys check
+      ]
 
-        return Promise.each(tearDownQueries, (query) => runQuery(query))
-          .then(() => endConnection())
+      const connection = directMySQLConnection(this.config)
+      const runQuery = Promise.promisify(connection.query, {
+        context: connection
       })
+      const endConnection = Promise.promisify(connection.end, {
+        context: connection
+      })
+
+      return Promise.each(tearDownQueries, (query) => runQuery(query)).then(
+        () => endConnection()
+      )
+    })
   }
 
   directMySQLQuery (query) {
@@ -203,7 +237,7 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
   }
 
   withTransaction (fn, options = {}) {
-    const { minDelay = 100, maxDelay = 1000} = options
+    const { minDelay = 100, maxDelay = 1000 } = options
 
     if (typeof fn !== 'function') {
       throw new Error('Must pass a function to withTransaction')
@@ -211,7 +245,7 @@ Name has to start with '${this.acceptableDbNamePrefix}'.`)
 
     return this.sequelize.transaction(fn).catch(async (error) => {
       if (error.message.startsWith('ER_LOCK_DEADLOCK')) {
-        await delay(random.int(MIN_DELAY, MAX_DELAY))
+        await delay(random.int(minDelay, maxDelay))
         return this.withTransaction(fn)
       }
       throw error

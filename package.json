@@ -8,7 +8,8 @@
     "coverage": "NODE_ENV=test_local pkg-coverage",
     "flow": "pkg-flow",
     "lint": "pkg-lint",
-    "prepublish": "pkg-build",
+    "tidy": "pkg-tidy",
+    "precommit": "pkg-precommit",
     "test": "NODE_ENV=test_local pkg-test"
   },
   "author": "George Czabania <george@mish.guru>",
@@ -23,6 +24,7 @@
     "mysql": "^2.16.0",
     "postgrator": "^3.8.0",
     "ramda": "^0.26.1",
+    "random": "^2.0.13",
     "sequelize": "^3.34.0"
   }
 }

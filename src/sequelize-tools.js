@@ -36,19 +36,18 @@ const waitXSeconds = (seconds = 10) => {
 }
 
 const authenticate = (sequelizeInstance, attemptCount = 0) => {
-  return sequelizeInstance.authenticate()
-    .catch((err) => {
-      console.error(`Caught ${err} on attempt ${attemptCount} when trying to connect to db, waiting ${BACKOFFWAITTIME} before retrying...`)
-      if (attemptCount > RETRYCONNECTLIMIT) {
-        throw err
-      }
+  return sequelizeInstance.authenticate().catch((err) => {
+    console.error(
+      `Caught ${err} on attempt ${attemptCount} when trying to connect to db, waiting ${BACKOFFWAITTIME} before retrying...`
+    )
+    if (attemptCount > RETRYCONNECTLIMIT) {
+      throw err
+    }
 
-      return waitXSeconds(BACKOFFWAITTIME)
-        .then(() => authenticate(sequelizeInstance, ++attemptCount))
-    })
+    return waitXSeconds(BACKOFFWAITTIME).then(() =>
+      authenticate(sequelizeInstance, ++attemptCount)
+    )
+  })
 }
 
-export {
-  buildSequelizeConfig,
-  authenticate
-}
+export { buildSequelizeConfig, authenticate }
