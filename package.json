@@ -15,7 +15,7 @@
   "author": "Mish Guru <dev@mish.guru>",
   "license": "MIT",
   "devDependencies": {
-    "@mishguru/package": "6.0.0-next.12",
+    "@mishguru/package": "6.0.0-next.13",
     "@types/mysql": "2.15.5",
     "@types/sequelize": "3.30.9"
   },
