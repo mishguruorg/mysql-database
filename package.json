@@ -9,26 +9,22 @@
     "lint": "pkg-lint",
     "tidy": "pkg-tidy",
     "precommit": "pkg-precommit",
-    "test": "NODE_ENV=test_local pkg-test",
-    "coverage": "NODE_ENV=test_local pkg-coverage"
+    "test": "pkg-test",
+    "coverage": "pkg-coverage"
   },
   "author": "Mish Guru <dev@mish.guru>",
   "license": "MIT",
   "devDependencies": {
-    "@mishguru/commandquery": "18.7.0-next.0",
     "@mishguru/package": "6.0.0-next.12",
     "@types/mysql": "2.15.5",
     "@types/sequelize": "3.30.9"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
     "chalk": "2.4.2",
     "delay": "4.1.0",
     "globby": "9.1.0",
     "mysql": "2.16.0",
     "postgrator": "3.10.1",
-    "ramda": "0.26.1",
-    "random": "2.1.1",
     "random-js": "2.0.0-rc5",
     "sequelize": "3.34.0"
   }
