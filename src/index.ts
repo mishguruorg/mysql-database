@@ -5,7 +5,10 @@ import teardownTestDatabase from './teardownTestDatabase'
 
 import authenticate from './authenticate'
 import buildModels from './buildModels'
-import withTransaction from './withTransaction'
+import withTransaction, {
+  TransactionCallback,
+  WithTransactionOptions,
+} from './withTransaction'
 import { directMySQLQuery } from './directMySQLConnection'
 import { runMigrations, checkMigrations } from './postgrator'
 
@@ -43,7 +46,7 @@ async function backwardsCompatibleInit (
   this.initialised = true
   this.sequelize = sequelizeInstance
 
-  await authenticate(this.sequelize)
+  await authenticate(sequelizeInstance)
   await checkMigrations(migrationDirectory, this.config)
 }
 
@@ -92,7 +95,12 @@ const createDatabase = (options: CreateDatabaseOptions): Database => {
     directMySQLQuery: (queryString: string) => {
       return directMySQLQuery(queryString, db.config)
     },
-    withTransaction,
+    withTransaction: <T>(
+      fn: TransactionCallback<T>,
+      options: WithTransactionOptions,
+    ) => {
+      return withTransaction(db.sequelize, fn, options)
+    },
     Sequelize,
   }
 

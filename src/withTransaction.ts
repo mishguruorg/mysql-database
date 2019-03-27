@@ -1,5 +1,6 @@
 import delay from 'delay'
 import { Random } from 'random-js'
+import { Sequelize } from 'sequelize'
 
 interface Transaction {
   LOCK: {
@@ -7,9 +8,9 @@ interface Transaction {
   },
 }
 
-type TransactionCallback<T> = (transaction: Transaction) => Promise<T>
+export type TransactionCallback<T> = (transaction: Transaction) => Promise<T>
 
-interface Options {
+export interface WithTransactionOptions {
   minDelay?: number,
   maxDelay?: number,
 }
@@ -17,8 +18,9 @@ interface Options {
 const random = new Random()
 
 const withTransaction = async <T>(
+  sequelizeInstance: Sequelize,
   fn: TransactionCallback<T>,
-  options: Options = {},
+  options: WithTransactionOptions = {},
 ): Promise<T> => {
   const { minDelay = 100, maxDelay = 1000 } = options
 
@@ -27,12 +29,12 @@ const withTransaction = async <T>(
   }
 
   try {
-    const result = await this.sequelize.transaction(fn)
+    const result = await sequelizeInstance.transaction(fn)
     return result
   } catch (error) {
     if (error.message.startsWith('ER_LOCK_DEADLOCK')) {
       await delay(random.real(minDelay, maxDelay))
-      return withTransaction(fn)
+      return withTransaction(sequelizeInstance, fn, options)
     }
     throw error
   }
