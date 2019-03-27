@@ -1,6 +1,6 @@
 {
   "name": "@mishguru/mysql-database",
-  "version": "3.0.0-next.2",
+  "version": "3.0.0-next.3",
   "description": "Core MySQL Database Class",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
