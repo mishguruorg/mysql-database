@@ -1,6 +1,11 @@
 import Postgrator from 'postgrator'
 
-const initPostgrator = (migrationDirectory, config) => {
+import { DatabaseConfig } from './types'
+
+const createPostgrator = (
+  migrationDirectory: string,
+  config: DatabaseConfig,
+) => {
   const postgrator = new Postgrator({
     migrationDirectory,
     driver: 'mysql',
@@ -9,7 +14,7 @@ const initPostgrator = (migrationDirectory, config) => {
     database: config.name,
     username: config.user,
     password: config.pass,
-    validateChecksums: false
+    validateChecksums: false,
   })
 
   if (config.verbose) {
@@ -24,8 +29,11 @@ const initPostgrator = (migrationDirectory, config) => {
   return postgrator
 }
 
-const checkMigrations = async (migrationDirectory, config) => {
-  const postgrator = initPostgrator(migrationDirectory, config)
+const checkMigrations = async (
+  migrationDirectory: string,
+  config: DatabaseConfig,
+) => {
+  const postgrator = createPostgrator(migrationDirectory, config)
 
   try {
     const maxVersion = await postgrator.getMaxVersion()
@@ -38,13 +46,13 @@ const checkMigrations = async (migrationDirectory, config) => {
           '*************************************************',
           databaseVersion < maxVersion
             ? 'The database is out of date and needs to be migrated!'
-            : 'The @mishguru/data package is out of date and should be updated!',
+            : 'The local database package is out of date and should be updated!',
           '*************************************************',
-          `Database is on version: ${databaseVersion}`,
-          `@mishguru/data is on version: ${maxVersion}`,
+          `Latest migration version on database: ${databaseVersion}`,
+          `Latest migration version available is: ${maxVersion}`,
           '*************************************************',
-          '*************************************************'
-        ].join('\n')
+          '*************************************************',
+        ].join('\n'),
       )
     }
   } catch (error) {
@@ -54,19 +62,29 @@ const checkMigrations = async (migrationDirectory, config) => {
         '*************************************************',
         'Could not check database schema version!',
         '*************************************************',
-        '*************************************************'
-      ].join('\n')
+        '*************************************************',
+      ].join('\n'),
     )
   }
 }
 
-const runMigrations = async (migrationDirectory, version, config) => {
-  const postgrator = initPostgrator(migrationDirectory, config)
+const runMigrations = async (
+  migrationDirectory: string,
+  config: DatabaseConfig,
+  version: string = 'max',
+) => {
+  const { verbose } = config
+  const postgrator = createPostgrator(migrationDirectory, config)
 
-  version = version != null ? version : 'max'
-  version = version.toString()
+  if (verbose) {
+    console.log('Starting to run migrations...')
+  }
 
   await postgrator.migrate(version)
+
+  if (verbose) {
+    console.log('Finished running migrations!')
+  }
 }
 
 export { checkMigrations, runMigrations }
