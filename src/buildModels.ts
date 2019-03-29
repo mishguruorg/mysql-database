@@ -1,5 +1,5 @@
 import { sync as globSync } from 'globby'
-import { Sequelize, DataTypes } from 'sequelize'
+import { DataTypes } from 'sequelize'
 import chalk from 'chalk'
 
 type AnyModel = any
@@ -11,15 +11,17 @@ interface Entity {
   deprecatedNames: string[],
 }
 
-type DeprecatedNameMap = Map<string, string>
-type ModelMap = Map<string, AnyModel>
-interface ModelMapProxy {
-  get(prop: string): AnyModel,
-  has(prop: string): boolean,
+interface Sequelize {
+  import: (name: string, entity: Entity) => AnyModel
 }
 
+type DeprecatedNameMap = Map<string, string>
+type ModelMap = Map<string, AnyModel>
+
+export type ModelMapProxy = Record<string, AnyModel>
+
 const buildEntityPaths = (entitiesDirectory: string) => {
-  const entityPaths = globSync(['*.js', '!*.spec.js'], {
+  const entityPaths = globSync(['*.(js|ts)', '!*.spec.(js|ts)'], {
     cwd: entitiesDirectory,
     absolute: true,
   })
@@ -61,7 +63,7 @@ const connectEntityRelationships = (
   modelMapProxy: ModelMapProxy,
 ) => {
   entities.forEach((entity) => {
-    const self = modelMapProxy.get(entity.name)
+    const self = modelMapProxy[entity.name]
     entity.relationships(self, modelMapProxy)
   })
 }
@@ -82,43 +84,66 @@ const warnDeprecatedProp = (oldProp: string, newProp: string) => {
   WARNED.add(oldProp)
 }
 
-const buildProxyGet = (deprecatedNameMap: DeprecatedNameMap) => (
-  target: ModelMap,
-  propSymbol: symbol,
+const buildProxyGet = (modelMap: ModelMap, deprecatedNameMap: DeprecatedNameMap) => (
+  target: object,
+  prop: string
 ) => {
-  const prop = String(propSymbol)
-
-  if (target.has(prop)) {
-    return target.get(prop)
+  if (modelMap.has(prop)) {
+    return modelMap.get(prop)
   }
 
   if (deprecatedNameMap.has(prop)) {
     const realProp = deprecatedNameMap.get(prop)
     warnDeprecatedProp(prop, realProp)
-    return target.get(realProp)
+    return modelMap.get(realProp)
   }
 
-  console.log('', prop)
   return undefined
 }
 
-const buildProxyHas = (deprecatedNameMap: DeprecatedNameMap) => (
-  target: ModelMap,
-  propSymbol: symbol,
+const buildProxyHas = (modelMap: ModelMap, deprecatedNameMap: DeprecatedNameMap) => (
+  target: object,
+  prop: string
 ) => {
+  return modelMap.has(prop) || deprecatedNameMap.has(prop)
+}
+
+const buildProxySet = () => () => {
+  throw new Error('Database models are immutable')
+}
+
+const buildProxyDeleteProperty = () => () => {
+  throw new Error('Database models are immutable')
+}
+
+const buildProxyOwnKeys = (modelMap: ModelMap) => (): string[] => {
+  return [...modelMap.keys()]
+}
+
+const buildGetOwnPropertyDescriptor = (modelMap: ModelMap) => (target: object, propSymbol: symbol) => {
   const prop = String(propSymbol)
-  return target.has(prop) || deprecatedNameMap.has(prop)
+  if (modelMap.has(prop)) {
+    return {
+      enumerable: true,
+      configurable: true,
+      value: modelMap.get(prop)
+    }
+  }
+  return undefined
 }
 
 const buildModelMapProxy = (
   modelMap: ModelMap,
   deprecatedNameMap: DeprecatedNameMap,
-) => {
-  const modelProxy = new Proxy(modelMap, {
-    get: buildProxyGet(deprecatedNameMap),
-    has: buildProxyHas(deprecatedNameMap),
+): ModelMapProxy => {
+  return new Proxy({}, {
+    get: buildProxyGet(modelMap, deprecatedNameMap),
+    has: buildProxyHas(modelMap, deprecatedNameMap),
+    set: buildProxySet(),
+    deleteProperty: buildProxyDeleteProperty(),
+    ownKeys: buildProxyOwnKeys(modelMap),
+    getOwnPropertyDescriptor: buildGetOwnPropertyDescriptor(modelMap)
   })
-  return modelProxy
 }
 
 const buildModels = (
